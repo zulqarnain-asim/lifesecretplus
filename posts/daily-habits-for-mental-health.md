@@ -1,7 +1,8 @@
 ---
-layout: post
 title: "5 Simple Daily Habits for Better Mental Health"
 author: LifeSecret Plus Team
+date: "2026-08-11"
+excerpt: "Small, consistent habits make the biggest difference. Five simple practices you can start today."
 ---
 
 Taking care of your mind doesn't require big changes. Small, consistent habits
