@@ -11,6 +11,8 @@ export default function sitemap() {
   return [
     { url: base, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/about`, changeFrequency: "yearly", priority: 0.6 },
+    { url: `${base}/contact`, changeFrequency: "yearly", priority: 0.6 },
     ...posts,
   ];
 }

@@ -43,47 +43,67 @@ export const metadata = {
   robots: { index: true, follow: true },
 };
 
+function Brand() {
+  return (
+    <Link className="brand" href="/">
+      <span className="brand-mark">L</span>
+      LifeSecret Plus
+    </Link>
+  );
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${newsreader.variable}`}>
       <body>
         <header className="site-header">
           <nav className="nav">
-            <Link className="brand" href="/">
-              LifeSecret<span>+</span>
-            </Link>
+            <Brand />
             <ul className="nav-links">
               <li>
                 <Link href="/blog">Blog</Link>
               </li>
               <li>
-                <Link href="/#about">About</Link>
+                <Link href="/about">About</Link>
               </li>
               <li>
-                <Link className="nav-cta" href="/#contact">
+                <Link className="nav-cta" href="/contact">
                   Contact
                 </Link>
               </li>
             </ul>
           </nav>
         </header>
+
         <main>{children}</main>
+
         <footer className="site-footer">
-          <div className="footer-inner">
-            <Link className="brand brand-footer" href="/">
-              LifeSecret<span>+</span>
-            </Link>
-            <p className="footer-tagline">
-              Practical wisdom for a calmer mind and a healthier life.
-            </p>
-            <nav className="footer-links">
+          <div className="footer-grid">
+            <div>
+              <Brand />
+              <p>
+                Practical, evidence-based guidance for a calmer mind and a
+                healthier everyday life.
+              </p>
+            </div>
+            <div className="footer-col">
+              <h4>Explore</h4>
+              <Link href="/">Home</Link>
               <Link href="/blog">Blog</Link>
-              <Link href="/#about">About</Link>
-              <a href="mailto:hello@lifesecretplus.com">Email us</a>
-            </nav>
-            <p className="footer-copy">
-              &copy; 2026 LifeSecret Plus. All rights reserved.
-            </p>
+              <Link href="/about">About</Link>
+              <Link href="/contact">Contact</Link>
+            </div>
+            <div className="footer-col">
+              <h4>Contact</h4>
+              <a href="mailto:hello@lifesecretplus.com">
+                hello@lifesecretplus.com
+              </a>
+              <Link href="/contact">Send a message</Link>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <span>© {new Date().getFullYear()} LifeSecret Plus.</span>
+            <span>Built for calmer, healthier days.</span>
           </div>
         </footer>
       </body>
