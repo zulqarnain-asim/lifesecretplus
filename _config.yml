@@ -1,0 +1,12 @@
+title: LifeSecret Plus
+description: Tips, guides, and secrets for mental health and wellbeing.
+url: "https://lifesecretplus.com"
+lang: en
+
+permalink: /blog/:year/:month/:title/
+
+# Pagination-free simple blog; GitHub Pages builds this automatically
+markdown: kramdown
+
+exclude:
+  - README.md
