@@ -1,7 +1,19 @@
 import Link from "next/link";
 import { getAllPosts } from "../../lib/posts";
 
-export const metadata = { title: "Blog — LifeSecret Plus" };
+export const metadata = {
+  title: "Mental Health & Wellbeing Blog",
+  description:
+    "Articles on mental health, stress, sleep, mindfulness, and healthy habits — practical guidance for a calmer mind.",
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "Mental Health & Wellbeing Blog — LifeSecret Plus",
+    description:
+      "Articles on mental health, stress, sleep, mindfulness, and healthy habits.",
+    url: "https://lifesecretplus.com/blog",
+    type: "website",
+  },
+};
 
 export default function Blog() {
   const posts = getAllPosts();

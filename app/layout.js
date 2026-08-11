@@ -2,10 +2,37 @@ import "./globals.css";
 import Link from "next/link";
 
 export const metadata = {
-  title: "LifeSecret Plus — Mental Health & Wellbeing",
-  description:
-    "Practical mental health tips, wellbeing guides, and everyday wisdom.",
   metadataBase: new URL("https://lifesecretplus.com"),
+  title: {
+    default: "LifeSecret Plus — Mental Health & Wellbeing",
+    template: "%s — LifeSecret Plus",
+  },
+  description:
+    "Practical mental health tips, wellbeing guides, and everyday wisdom for a calmer mind and a healthier life.",
+  keywords: [
+    "mental health",
+    "wellbeing",
+    "mindfulness",
+    "stress relief",
+    "self care",
+    "healthy habits",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "https://lifesecretplus.com",
+    siteName: "LifeSecret Plus",
+    title: "LifeSecret Plus — Mental Health & Wellbeing",
+    description:
+      "Practical mental health tips, wellbeing guides, and everyday wisdom for a calmer mind and a healthier life.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LifeSecret Plus — Mental Health & Wellbeing",
+    description:
+      "Practical mental health tips, wellbeing guides, and everyday wisdom.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }) {
