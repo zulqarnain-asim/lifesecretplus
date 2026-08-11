@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { getAllPosts } from "../../lib/posts";
 
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
 export const metadata = {
   title: "Mental Health & Wellbeing Blog",
   description:
@@ -29,7 +36,7 @@ export default function Blog() {
                 <img className="thumb" src={post.image} alt={post.title} />
               )}
               <h3>{post.title}</h3>
-              <p className="post-meta">{post.date}</p>
+              <p className="post-meta">{fmtDate(post.date)}</p>
               <p>{post.excerpt}</p>
             </Link>
           </li>

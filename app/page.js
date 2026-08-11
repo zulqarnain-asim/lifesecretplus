@@ -1,15 +1,24 @@
 import Link from "next/link";
 import { getAllPosts } from "../lib/posts";
 
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
 export default function Home() {
   const posts = getAllPosts().slice(0, 3);
   return (
     <>
       <section className="hero">
-        <h1>Your Mind Matters</h1>
+        <h1>
+          A calmer mind, <em>one habit</em> at a time.
+        </h1>
         <p>
-          Practical mental health tips, wellbeing guides, and everyday wisdom —
-          all in one place.
+          Practical mental health tips, wellbeing guides, and everyday wisdom
+          — all in one place.
         </p>
         <Link className="btn" href="/blog">
           Read the Blog
@@ -53,7 +62,7 @@ export default function Home() {
                   <img className="thumb" src={post.image} alt={post.title} />
                 )}
                 <h3>{post.title}</h3>
-                <p className="post-meta">{post.date}</p>
+                <p className="post-meta">{fmtDate(post.date)}</p>
                 <p>{post.excerpt}</p>
               </Link>
             </li>

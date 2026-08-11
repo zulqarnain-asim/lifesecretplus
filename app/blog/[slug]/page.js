@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { getAllPosts, getPost } from "../../../lib/posts";
 
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
 export function generateStaticParams() {
   return getAllPosts().map((post) => ({ slug: post.slug }));
 }
@@ -55,7 +62,7 @@ export default async function Post({ params }) {
       <header className="post-header">
         <h1>{post.title}</h1>
         <p className="post-meta">
-          {post.date}
+          {fmtDate(post.date)}
           {post.author ? ` · ${post.author}` : ""}
         </p>
         {post.image && <img src={post.image} alt={post.title} />}
