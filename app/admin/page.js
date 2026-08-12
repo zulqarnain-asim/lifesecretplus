@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { countContactMessages, getContactMessages, isDatabaseConfigured } from "../../lib/db";
 import { markMessage, removeMessage } from "./actions";
+import ConfirmButton from "./ConfirmButton";
 
 export const dynamic = "force-dynamic";
 
@@ -141,12 +142,12 @@ export default async function AdminMessages({ searchParams }) {
                               Mark {m.status === "new" ? "read" : "unread"}
                             </button>
                           </form>
-                          <form action={removeMessage}>
-                            <input type="hidden" name="id" value={m.id} />
-                            <button className="btn btn-outline btn-sm admin-delete" type="submit">
-                              Delete
-                            </button>
-                          </form>
+                          <ConfirmButton
+                            action={removeMessage}
+                            fields={{ id: m.id }}
+                            title="Delete this message?"
+                            message={`The message from ${m.name} will be permanently removed.`}
+                          />
                         </div>
                       </td>
                     </tr>

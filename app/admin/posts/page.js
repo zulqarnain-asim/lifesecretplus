@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getDbPosts, isDatabaseConfigured } from "../../../lib/db";
+import { getDbPosts, getImportedSlugs, isDatabaseConfigured } from "../../../lib/db";
 import { getFilePostSlugs } from "../../../lib/posts";
-import { removePost } from "../actions";
+import { importBundledPosts, removePost } from "../actions";
+import ConfirmButton from "../ConfirmButton";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,8 @@ export default async function AdminPosts({ searchParams }) {
     .filter((p) => (q ? `${p.title} ${p.slug} ${p.tag || ""}`.toLowerCase().includes(q) : true));
 
   const bundled = getFilePostSlugs();
+  const imported = new Set(await getImportedSlugs().catch(() => []));
+  const notImported = bundled.filter((slug) => !imported.has(slug));
 
   return (
     <>
@@ -55,6 +58,29 @@ export default async function AdminPosts({ searchParams }) {
       ) : (
         <>
           {params?.saved && <p className="form-status ok">Post saved and published to the blog.</p>}
+          {params?.imported && (
+            <p className="form-status ok">
+              Imported {params.imported} article{params.imported === "1" ? "" : "s"} into the
+              database. You can now edit or delete them here.
+            </p>
+          )}
+
+          {notImported.length > 0 && (
+            <div className="admin-banner">
+              <div>
+                <strong>Import the built-in articles</strong>
+                <p>
+                  {notImported.length} article{notImported.length === 1 ? " is" : "s are"} still
+                  served from markdown files. Import them to edit, update or delete them from here.
+                </p>
+              </div>
+              <form action={importBundledPosts}>
+                <button className="btn btn-sm" type="submit">
+                  Import {notImported.length} article{notImported.length === 1 ? "" : "s"}
+                </button>
+              </form>
+            </div>
+          )}
 
           <div className="admin-cards">
             <div className="admin-card">
@@ -66,8 +92,8 @@ export default async function AdminPosts({ searchParams }) {
               <span>Drafts</span>
             </div>
             <div className="admin-card">
-              <strong>{bundled.length}</strong>
-              <span>Built-in articles</span>
+              <strong>{notImported.length}</strong>
+              <span>Not imported</span>
             </div>
           </div>
 
@@ -141,12 +167,12 @@ export default async function AdminPosts({ searchParams }) {
                           <Link href={`/admin/posts/${p.id}`} className="btn btn-outline btn-sm">
                             Edit
                           </Link>
-                          <form action={removePost}>
-                            <input type="hidden" name="id" value={p.id} />
-                            <button className="btn btn-outline btn-sm admin-delete" type="submit">
-                              Delete
-                            </button>
-                          </form>
+                          <ConfirmButton
+                            action={removePost}
+                            fields={{ id: p.id }}
+                            title="Delete this post?"
+                            message={`“${p.title}” and its uploaded cover image will be permanently removed from the blog.`}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -157,9 +183,9 @@ export default async function AdminPosts({ searchParams }) {
           )}
 
           <p className="admin-note">
-            The {bundled.length} original articles ship with the site as markdown files and are
-            always live. Anything you write here is stored in the database and appears on the blog
-            straight away.
+            {notImported.length > 0
+              ? `${notImported.length} of ${bundled.length} original articles still come from markdown files. Import them above to manage everything from the database.`
+              : "Every article is stored in the database, so anything you add, edit or delete here shows on the blog straight away."}
           </p>
         </>
       )}

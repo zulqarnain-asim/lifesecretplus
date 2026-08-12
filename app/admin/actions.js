@@ -1,6 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
+import fs from "fs";
+import path from "path";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -14,10 +16,16 @@ import {
   createDbPost,
   deleteContactMessage,
   deleteDbPost,
+  deleteImage,
+  getDbPostById,
+  getDbPosts,
+  getImportedSlugs,
+  markImported,
   saveImage,
   setContactMessageStatus,
   updateDbPost,
 } from "../../lib/db";
+import { getFilePosts } from "../../lib/posts";
 
 const attempts = new Map();
 const ATTEMPT_WINDOW_MS = 5 * 60_000;
@@ -101,6 +109,17 @@ function revalidateBlog(slug) {
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 
+/** Id of an image stored in the database, or null for static paths and external URLs. */
+function uploadedImageId(image) {
+  const match = /^\/media\/(\d+)$/.exec(String(image || ""));
+  return match ? match[1] : null;
+}
+
+async function discardUpload(image) {
+  const id = uploadedImageId(image);
+  if (id) await deleteImage(id).catch(() => {});
+}
+
 async function storeUpload(file) {
   if (!file || typeof file.arrayBuffer !== "function" || file.size === 0) return null;
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -132,12 +151,17 @@ export async function savePost(_prevState, formData) {
   if (!slug) return { error: "Could not build a URL slug — please set one manually." };
 
   let image = String(formData.get("image") || "").trim() || null;
+  const previous = id ? await getDbPostById(id) : null;
+  let replaced = null;
+
   try {
     const uploaded = await storeUpload(formData.get("imageFile"));
     if (uploaded) image = uploaded;
   } catch (err) {
     return { error: err.message };
   }
+
+  if (previous && previous.image !== image) replaced = previous.image;
 
   const post = {
     slug,
@@ -158,9 +182,12 @@ export async function savePost(_prevState, formData) {
       await createDbPost(post);
     }
   } catch (err) {
+    await discardUpload(image !== previous?.image ? image : null);
     if (err?.code === "23505") return { error: "That URL slug is already used by another post." };
     return { error: "Could not save the post. Please try again." };
   }
+
+  await discardUpload(replaced);
 
   revalidateBlog(slug);
   revalidatePath("/admin/posts");
@@ -170,6 +197,69 @@ export async function savePost(_prevState, formData) {
 export async function removePost(formData) {
   await requireSession();
   const deleted = await deleteDbPost(formData.get("id"));
+  await discardUpload(deleted?.image);
   revalidateBlog(deleted?.slug);
   revalidatePath("/admin/posts");
+}
+
+/** Copies the markdown articles bundled with the site into the database. */
+export async function importBundledPosts() {
+  await requireSession();
+
+  const existing = new Set(await getImportedSlugs());
+  const inDb = new Set((await getDbPosts({ status: "all" })).map((p) => p.slug));
+  const bundled = getFilePosts().filter((p) => !existing.has(p.slug));
+  if (bundled.length === 0) redirect("/admin/posts");
+
+  for (const post of bundled) {
+    if (inDb.has(post.slug)) {
+      await markImported(post.slug);
+      continue;
+    }
+
+    const image = post.image ? await importImage(post.image) : null;
+    await createDbPost({
+      slug: post.slug,
+      title: post.title,
+      excerpt: post.excerpt,
+      image,
+      author: post.author,
+      tag: post.tag,
+      content: post.content,
+      status: "published",
+      publishedAt: post.date,
+    });
+    await markImported(post.slug);
+    revalidateBlog(post.slug);
+  }
+
+  revalidatePath("/admin/posts");
+  redirect(`/admin/posts?imported=${bundled.length}`);
+}
+
+async function importImage(src) {
+  if (!src.startsWith("/")) return src;
+
+  const mime = src.endsWith(".png")
+    ? "image/png"
+    : src.endsWith(".webp")
+      ? "image/webp"
+      : "image/jpeg";
+
+  let buffer = null;
+  const local = path.join(process.cwd(), "public", src.replace(/^\//, ""));
+  if (fs.existsSync(local)) {
+    buffer = fs.readFileSync(local);
+  } else {
+    // public/ is not bundled into serverless functions, so read it back over HTTP.
+    const head = await headers();
+    const host = head.get("host");
+    const proto = head.get("x-forwarded-proto") || "https";
+    const res = await fetch(`${proto}://${host}${src}`).catch(() => null);
+    if (!res?.ok) return src;
+    buffer = Buffer.from(await res.arrayBuffer());
+  }
+
+  const saved = await saveImage({ filename: path.basename(src), mime, buffer });
+  return saved ? `/media/${saved.id}` : src;
 }
