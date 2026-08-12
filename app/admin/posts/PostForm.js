@@ -20,6 +20,7 @@ export default function PostForm({ post }) {
   const [title, setTitle] = useState(post?.title || "");
   const [slug, setSlug] = useState(post?.slug || "");
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
+  const [preview, setPreview] = useState(null);
 
   const publishedAt = post?.published_at
     ? new Date(post.published_at).toISOString().slice(0, 10)
@@ -119,14 +120,34 @@ export default function PostForm({ post }) {
           </div>
 
           <div className="field">
-            <label htmlFor="image">Cover image</label>
+            <label htmlFor="imageFile">Cover image</label>
+            <input
+              id="imageFile"
+              name="imageFile"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                setPreview(file ? URL.createObjectURL(file) : null);
+              }}
+            />
+            <small>Upload a JPG, PNG or WebP up to 4MB.</small>
+
+            {(preview || post?.image) && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img className="admin-thumb" src={preview || post.image} alt="Cover preview" />
+            )}
+          </div>
+
+          <div className="field">
+            <label htmlFor="image">…or an image path</label>
             <input
               id="image"
               name="image"
               defaultValue={post?.image || ""}
               placeholder="/images/blog/embrace-self-worth.jpg"
             />
-            <small>Path to an image in the public folder, or a full https:// URL.</small>
+            <small>Used only when no file is uploaded.</small>
           </div>
 
           <div className="admin-form-actions">

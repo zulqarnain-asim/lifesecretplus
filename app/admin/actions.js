@@ -14,6 +14,7 @@ import {
   createDbPost,
   deleteContactMessage,
   deleteDbPost,
+  saveImage,
   setContactMessageStatus,
   updateDbPost,
 } from "../../lib/db";
@@ -97,6 +98,26 @@ function revalidateBlog(slug) {
   if (slug) revalidatePath(`/blog/${slug}`);
 }
 
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+
+async function storeUpload(file) {
+  if (!file || typeof file.arrayBuffer !== "function" || file.size === 0) return null;
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    throw new Error("Please upload a JPG, PNG, WebP, GIF or AVIF image.");
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error("That image is larger than 4MB — please use a smaller file.");
+  }
+
+  const saved = await saveImage({
+    filename: file.name || "upload",
+    mime: file.type,
+    buffer: Buffer.from(await file.arrayBuffer()),
+  });
+  return saved ? `/media/${saved.id}` : null;
+}
+
 export async function savePost(_prevState, formData) {
   await requireSession();
 
@@ -110,11 +131,19 @@ export async function savePost(_prevState, formData) {
   if (content.length < 20) return { error: "The post content is too short." };
   if (!slug) return { error: "Could not build a URL slug — please set one manually." };
 
+  let image = String(formData.get("image") || "").trim() || null;
+  try {
+    const uploaded = await storeUpload(formData.get("imageFile"));
+    if (uploaded) image = uploaded;
+  } catch (err) {
+    return { error: err.message };
+  }
+
   const post = {
     slug,
     title,
     excerpt: String(formData.get("excerpt") || "").trim() || null,
-    image: String(formData.get("image") || "").trim() || null,
+    image,
     author: String(formData.get("author") || "").trim() || null,
     tag: String(formData.get("tag") || "").trim() || null,
     content,
