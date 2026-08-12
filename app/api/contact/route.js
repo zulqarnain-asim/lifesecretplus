@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDatabaseConfigured, saveContactMessage } from "../../../lib/db";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -16,6 +17,7 @@ function isRateLimited(ip) {
 
 export async function POST(request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+  const userAgent = request.headers.get("user-agent") || "";
 
   if (isRateLimited(ip)) {
     return NextResponse.json(
@@ -63,12 +65,21 @@ export async function POST(request) {
     return NextResponse.json({ error: "Subject is too long." }, { status: 400 });
   }
 
-  const submission = { name, email, subject, message, ip, at: new Date().toISOString() };
+  const submission = { name, email, subject, message, ip, userAgent };
 
-  // Forwards to email when RESEND_API_KEY and CONTACT_TO_EMAIL are configured,
-  // otherwise the submission is logged for the deployment platform to capture.
+  let stored = false;
+  if (isDatabaseConfigured) {
+    try {
+      stored = Boolean(await saveContactMessage(submission));
+    } catch (err) {
+      console.error("Failed to store contact message:", err);
+    }
+  }
+
+  // Optional email notification on top of storage.
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;
+  let emailed = false;
 
   if (apiKey && to) {
     try {
@@ -83,21 +94,27 @@ export async function POST(request) {
           to: [to],
           reply_to: email,
           subject: subject
-            ? `[LifeSecret Plus] ${subject}`
-            : `[LifeSecret Plus] New message from ${name}`,
+            ? `[Life Secret Plus] ${subject}`
+            : `[Life Secret Plus] New message from ${name}`,
           text: `From: ${name} <${email}>\n\n${message}`,
         }),
       });
 
-      if (!res.ok) throw new Error("Email provider rejected the request.");
-    } catch {
+      if (!res.ok) throw new Error(await res.text());
+      emailed = true;
+    } catch (err) {
+      console.error("Failed to send contact email:", err);
+    }
+  }
+
+  if (!stored && !emailed) {
+    if (isDatabaseConfigured || (apiKey && to)) {
       return NextResponse.json(
-        { error: "We couldn't send your message. Please email us directly." },
+        { error: "We couldn't save your message. Please email us directly." },
         { status: 502 }
       );
     }
-  } else {
-    console.log("Contact submission:", submission);
+    console.log("Contact submission (no storage configured):", submission);
   }
 
   return NextResponse.json({

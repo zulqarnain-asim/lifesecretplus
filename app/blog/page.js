@@ -1,64 +1,78 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getAllPosts } from "../../lib/posts";
 
-const fmtDate = (d) =>
-  new Date(d).toLocaleDateString("en-US", {
+export const metadata = {
+  title: "Blog",
+  description:
+    "Insights on self-worth, dignity, habits, faith, failure and kindness — practical encouragement from Life Secret Plus.",
+  alternates: { canonical: "/blog" },
+};
+
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString("en-GB", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-
-export const metadata = {
-  title: "Mental Health & Wellbeing Blog",
-  description:
-    "Articles on mental health, stress, sleep, mindfulness, and healthy habits — practical guidance for a calmer mind.",
-  alternates: { canonical: "/blog" },
-  openGraph: {
-    title: "Mental Health & Wellbeing Blog — LifeSecret Plus",
-    description:
-      "Articles on mental health, stress, sleep, mindfulness, and healthy habits.",
-    url: "https://lifesecretplus.com/blog",
-    type: "website",
-  },
-};
+}
 
 export default function Blog() {
   const posts = getAllPosts();
 
   return (
     <>
-      <section className="page-head">
+      <section className="page-hero">
         <div className="wrap">
-          <h1>The Blog</h1>
+          <span className="eyebrow">Our Blog</span>
+          <h1>Insights &amp; Inspiration</h1>
           <p>
-            Practical guidance on mental health, wellbeing habits, and
-            mindfulness — written to be used, not just read.
+            Honest, practical writing on self-worth, resilience and living with purpose — written to
+            lift you up on the days you need it most.
+          </p>
+          <p className="crumb">
+            <Link href="/">Home</Link> / Blog
           </p>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: "2rem" }}>
+      <section className="section">
         <div className="wrap">
           {posts.length === 0 ? (
-            <p className="post-meta">No articles published yet.</p>
+            <p style={{ textAlign: "center" }}>New articles are on the way — check back soon.</p>
           ) : (
-            <ul className="post-list">
+            <div className="posts">
               {posts.map((post) => (
-                <li className="post-item" key={post.slug}>
+                <article className="post-card" key={post.slug}>
                   <Link href={`/blog/${post.slug}`}>
-                    {post.image && (
-                      <img className="thumb" src={post.image} alt={post.title} />
-                    )}
-                    <div className="post-body">
-                      <p className="post-meta">{fmtDate(post.date)}</p>
-                      <h3>{post.title}</h3>
-                      <p>{post.excerpt}</p>
-                      <span className="read-more">Read article →</span>
+                    <div className="post-media">
+                      {post.image && (
+                        <Image
+                          src={post.image}
+                          alt={post.title}
+                          width={640}
+                          height={400}
+                          sizes="(max-width: 960px) 92vw, 360px"
+                        />
+                      )}
                     </div>
                   </Link>
-                </li>
+                  <div className="post-body">
+                    <div className="post-meta">
+                      <span className="tag">Mindset</span>
+                      <time dateTime={post.date}>{fmtDate(post.date)}</time>
+                    </div>
+                    <h3>
+                      <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+                    </h3>
+                    <p>{post.excerpt}</p>
+                    <Link href={`/blog/${post.slug}`} className="read-more">
+                      Read more →
+                    </Link>
+                  </div>
+                </article>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </section>

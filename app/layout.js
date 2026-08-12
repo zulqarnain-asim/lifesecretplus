@@ -1,109 +1,167 @@
-import "./globals.css";
+import { Poppins } from "next/font/google";
 import Link from "next/link";
-import { Inter, Newsreader } from "next/font/google";
+import "./globals.css";
+import SiteHeader from "./SiteHeader";
+import { site, nav, socials } from "./site";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const newsreader = Newsreader({
+const poppins = Poppins({
   subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
 });
 
 export const metadata = {
-  metadataBase: new URL("https://lifesecretplus.com"),
+  metadataBase: new URL(site.url),
   title: {
-    default: "LifeSecret Plus — Mental Health & Wellbeing",
-    template: "%s — LifeSecret Plus",
+    default: "Life Secret Plus — Palmistry Readings & Life Coaching",
+    template: "%s — Life Secret Plus",
   },
   description:
-    "Practical mental health tips, wellbeing guides, and everyday wisdom for a calmer mind and a healthier life.",
+    "Life Secret Plus offers palm readings, life coaching and positive psychology guidance with Shaheen Haq — helping you build a balanced, meaningful and joyful life.",
   keywords: [
-    "mental health",
-    "wellbeing",
-    "mindfulness",
-    "stress relief",
-    "self care",
-    "healthy habits",
+    "palmistry",
+    "palm reading",
+    "life coaching",
+    "positive psychology",
+    "self motivation consulting",
+    "mindfulness training",
+    "personal development",
+    "Shaheen Haq",
   ],
+  authors: [{ name: site.author }],
+  creator: site.author,
   alternates: { canonical: "/" },
+  icons: { icon: "/images/shared/favicon-lifesecret-plus.png" },
   openGraph: {
     type: "website",
-    url: "https://lifesecretplus.com",
-    siteName: "LifeSecret Plus",
-    title: "LifeSecret Plus — Mental Health & Wellbeing",
+    url: site.url,
+    siteName: site.name,
+    title: "Life Secret Plus — Palmistry Readings & Life Coaching",
     description:
-      "Practical mental health tips, wellbeing guides, and everyday wisdom for a calmer mind and a healthier life.",
+      "Palm readings, life coaching and positive psychology guidance to help you live a balanced, meaningful life.",
+    locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LifeSecret Plus — Mental Health & Wellbeing",
+    title: "Life Secret Plus — Palmistry Readings & Life Coaching",
     description:
-      "Practical mental health tips, wellbeing guides, and everyday wisdom.",
+      "Palm readings, life coaching and positive psychology guidance to help you live a balanced, meaningful life.",
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
-function Brand() {
-  return (
-    <Link className="brand" href="/">
-      <span className="brand-mark">L</span>
-      LifeSecret Plus
-    </Link>
-  );
-}
+export const viewport = {
+  themeColor: "#6d28d9",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({ children }) {
-  return (
-    <html lang="en" className={`${inter.variable} ${newsreader.variable}`}>
-      <body>
-        <header className="site-header">
-          <nav className="nav">
-            <Brand />
-            <ul className="nav-links">
-              <li>
-                <Link href="/blog">Blog</Link>
-              </li>
-              <li>
-                <Link href="/about">About</Link>
-              </li>
-              <li>
-                <Link className="nav-cta" href="/contact">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </nav>
-        </header>
+  const year = new Date().getFullYear();
 
+  return (
+    <html lang="en" className={poppins.variable}>
+      <body>
+        <SiteHeader />
         <main>{children}</main>
 
         <footer className="site-footer">
           <div className="footer-grid">
-            <div>
-              <Brand />
+            <div className="footer-col">
+              <Link href="/" className="brand">
+                <span className="brand-mark" aria-hidden="true">
+                  ✦
+                </span>
+                <span>
+                  Life Secret Plus
+                  <small>Insight &amp; Guidance</small>
+                </span>
+              </Link>
               <p>
-                Practical, evidence-based guidance for a calmer mind and a
-                healthier everyday life.
+                Empowering lives with insight and guidance — palmistry readings, life coaching and
+                positive psychology to help you build a balanced, meaningful life.
               </p>
+              <div className="socials">
+                {socials.map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d={s.path} />
+                    </svg>
+                  </a>
+                ))}
+              </div>
             </div>
+
             <div className="footer-col">
-              <h4>Explore</h4>
-              <Link href="/">Home</Link>
-              <Link href="/blog">Blog</Link>
-              <Link href="/about">About</Link>
-              <Link href="/contact">Contact</Link>
+              <h4>Quick Links</h4>
+              <ul>
+                {nav.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href}>{item.label}</Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+
             <div className="footer-col">
-              <h4>Contact</h4>
-              <a href="mailto:hello@lifesecretplus.com">
-                hello@lifesecretplus.com
-              </a>
-              <Link href="/contact">Send a message</Link>
+              <h4>Services</h4>
+              <ul>
+                <li>
+                  <Link href="/services">Palm Reading</Link>
+                </li>
+                <li>
+                  <Link href="/services">Future Predictions</Link>
+                </li>
+                <li>
+                  <Link href="/services">Relationship Guidance</Link>
+                </li>
+                <li>
+                  <Link href="/services">Life Coaching</Link>
+                </li>
+                <li>
+                  <Link href="/services">Mindfulness Training</Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-col subscribe">
+              <h4>Get in Touch</h4>
+              <ul className="footer-contact">
+                <li>
+                  <i aria-hidden="true">✆</i>
+                  <a href={`tel:${site.phoneHref}`}>{site.phone}</a>
+                </li>
+                <li>
+                  <i aria-hidden="true">✉</i>
+                  <a href={`mailto:${site.email}`}>{site.email}</a>
+                </li>
+                <li>
+                  <i aria-hidden="true">◷</i>
+                  <span>In-person &amp; virtual sessions · replies within 1–2 days</span>
+                </li>
+              </ul>
+              <Link href="/contact" className="btn btn-sm" style={{ marginTop: "0.5rem" }}>
+                Book a Session
+              </Link>
             </div>
           </div>
+
           <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} LifeSecret Plus.</span>
-            <span>Built for calmer, healthier days.</span>
+            <div className="footer-bottom-inner">
+              <span>© {year} Life Secret Plus. All rights reserved.</span>
+              <span>Made with care for your personal growth.</span>
+            </div>
           </div>
         </footer>
       </body>

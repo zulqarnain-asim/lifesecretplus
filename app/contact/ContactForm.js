@@ -38,22 +38,22 @@ export default function ContactForm() {
       <div className="form-row">
         <div className="field">
           <label htmlFor="name">Name</label>
-          <input id="name" name="name" type="text" required maxLength={100} />
+          <input id="name" name="name" type="text" placeholder="Your full name" required maxLength={100} />
         </div>
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" required maxLength={200} />
+          <input id="email" name="email" type="email" placeholder="you@example.com" required maxLength={200} />
         </div>
       </div>
 
       <div className="field">
         <label htmlFor="subject">Subject</label>
-        <input id="subject" name="subject" type="text" maxLength={150} />
+        <input id="subject" name="subject" type="text" placeholder="Palm reading enquiry" maxLength={150} />
       </div>
 
       <div className="field">
         <label htmlFor="message">Message</label>
-        <textarea id="message" name="message" required maxLength={5000} />
+        <textarea id="message" name="message" placeholder="Tell me a little about what you're looking for…" required maxLength={5000} />
       </div>
 
       {/* Honeypot field hidden from users to catch spam bots */}
@@ -65,11 +65,11 @@ export default function ContactForm() {
       </div>
 
       <button className="btn" type="submit" disabled={sending}>
-        {sending ? "Sending…" : "Send message"}
+        {sending ? "Sending…" : "Send message →"}
       </button>
 
       <p className="form-note">
-        We only use your email to reply. No newsletters, no sharing.
+        Your email is only used to reply. No newsletters, no sharing.
       </p>
 
       {status && (

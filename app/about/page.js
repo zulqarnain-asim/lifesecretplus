@@ -1,76 +1,134 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata = {
-  title: "About",
+  title: "About Us",
   description:
-    "LifeSecret Plus shares practical, evidence-based mental health and wellbeing guidance for everyday life.",
+    "Life Secret Plus empowers individuals through workshops, seminars and online resources — cultivating positive mindsets, self-love and balanced, meaningful lives.",
   alternates: { canonical: "/about" },
 };
+
+const values = [
+  {
+    num: "01",
+    title: "Our Mission",
+    text: "To empower individuals to discover their inner beauty, embrace positive thinking and create a harmonious balance in all aspects of life. We provide the tools, resources and guidance that lead to greater peace, health and happiness.",
+  },
+  {
+    num: "02",
+    title: "Our Vision",
+    text: "A world where every individual values their unique self and nurtures their inner light to build a beautiful, fulfilling life — a society where positivity, self-love and personal growth are celebrated.",
+  },
+  {
+    num: "03",
+    title: "Our Approach",
+    text: "We focus on cultivating a positive mindset, self-discovery and alignment with your inner values. Our workshops and resources combine psychology, palmistry, astrology and practical strategy, delivered with personalized guidance.",
+  },
+];
+
+const stats = [
+  { value: "100+", label: "Work Done" },
+  { value: "36K", label: "Followers" },
+  { value: "4", label: "Community Groups" },
+  { value: "10", label: "Countries Reached" },
+];
 
 export default function About() {
   return (
     <>
-      <section className="page-head">
+      <section className="page-hero">
         <div className="wrap">
-          <h1>About LifeSecret Plus</h1>
-          <p>
-            We turn research on mental health and wellbeing into small, doable
-            steps you can use today.
+          <span className="eyebrow">About Us</span>
+          <h1>Our Company</h1>
+          <p>Empowering lives with insight and guidance since day one.</p>
+          <p className="crumb">
+            <Link href="/">Home</Link> / About Us
           </p>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: "2rem" }}>
+      <section className="section">
         <div className="wrap">
-          <div className="prose">
-            <h2>Why we started</h2>
-            <p>
-              Good mental health advice is often buried in clinical language or
-              lost in noisy social feeds. We started LifeSecret Plus to make it
-              plain: what actually helps, why it works, and how to fit it into a
-              normal, busy day.
-            </p>
-
-            <h2>What we believe</h2>
-            <ul>
-              <li>
-                <strong>Small beats perfect.</strong> A five-minute habit you
-                repeat matters more than an ideal routine you abandon.
-              </li>
-              <li>
-                <strong>Evidence over hype.</strong> We favour approaches with
-                real research behind them, and say so when evidence is thin.
-              </li>
-              <li>
-                <strong>No judgement.</strong> Struggling is human. Our writing
-                is calm, kind, and free of shame.
-              </li>
-              <li>
-                <strong>Accessible always.</strong> Every guide is free to read,
-                with no paywalls.
-              </li>
-            </ul>
-
-            <h2>What we write about</h2>
-            <p>
-              Stress and anxiety, sleep, mindfulness and breathing techniques,
-              emotional regulation, focus and motivation, healthy routines, and
-              building resilience over time.
-            </p>
-
-            <h2>An important note</h2>
-            <p>
-              LifeSecret Plus shares general educational content. It is not
-              medical advice and is not a substitute for professional care. If
-              you are struggling with your mental health, please speak with a
-              qualified professional or your local crisis service.
-            </p>
-
-            <p style={{ marginTop: "2rem" }}>
-              <Link className="btn" href="/contact">
-                Contact the team
+          <div className="split">
+            <div className="split-media">
+              <Image
+                src="/images/about/author-shaheen-haq.jpg"
+                alt="Shaheen Haq, founder of Life Secret Plus"
+                fill
+                sizes="(max-width: 960px) 92vw, 540px"
+                priority
+              />
+            </div>
+            <div className="split-body">
+              <span className="eyebrow">What we are</span>
+              <h2>Empowering lives for balance and meaning</h2>
+              <p>
+                Our current focus is on empowering individuals through workshops, seminars and
+                online resources. We aim to cultivate positive mindsets, promote self-love and inner
+                beauty, and guide people in creating balanced and meaningful lives.
+              </p>
+              <ul className="checks">
+                <li>Personalized palmistry readings rooted in tradition</li>
+                <li>Life coaching that turns intention into action</li>
+                <li>Positive psychology tools you can use every day</li>
+              </ul>
+              <Link href="/blog" className="btn">
+                Get started →
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-soft">
+        <div className="wrap">
+          <div className="section-head">
+            <span className="eyebrow center">What drives us</span>
+            <h2>Mission, vision and approach</h2>
+          </div>
+          <div className="grid grid-3">
+            {values.map((v) => (
+              <article className="card" key={v.num}>
+                <div className="card-icon" aria-hidden="true">
+                  {v.num}
+                </div>
+                <h3>{v.title}</h3>
+                <p>{v.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="stats">
+            {stats.map((s) => (
+              <div className="stat" key={s.label}>
+                <strong>{s.value}</strong>
+                <span>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-soft">
+        <div className="wrap">
+          <div className="cta-band">
+            <span className="eyebrow center">Ready when you are</span>
+            <h2>Start your journey towards a balanced life</h2>
+            <p>
+              Book a consultation and let&apos;s explore what your next chapter could look like.
             </p>
+            <div className="cta-actions">
+              <Link href="/contact" className="btn btn-light">
+                Book a Session
+              </Link>
+              <Link href="/services" className="btn btn-outline">
+                See Services
+              </Link>
+            </div>
           </div>
         </div>
       </section>

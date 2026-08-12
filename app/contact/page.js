@@ -1,64 +1,95 @@
+import Link from "next/link";
 import ContactForm from "./ContactForm";
+import { site, socials } from "../site";
 
 export const metadata = {
   title: "Contact",
   description:
-    "Get in touch with the LifeSecret Plus team — questions, feedback, or topic requests.",
+    "Get in touch with Life Secret Plus to book a palmistry reading, life coaching session or ask a question. In-person and virtual sessions available.",
   alternates: { canonical: "/contact" },
 };
 
 export default function Contact() {
   return (
     <>
-      <section className="page-head">
+      <section className="page-hero">
         <div className="wrap">
-          <h1>Get in touch</h1>
+          <span className="eyebrow">Contact</span>
+          <h1>Let&apos;s Talk</h1>
           <p>
-            Questions, feedback, or a topic you&rsquo;d like us to cover? Send us
-            a message.
+            Book a session, ask a question, or simply say hello. Every message is read personally.
+          </p>
+          <p className="crumb">
+            <Link href="/">Home</Link> / Contact
           </p>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: "2rem" }}>
+      <section className="section">
         <div className="wrap">
           <div className="contact-grid">
-            <div className="contact-aside">
-              <h2>We read everything</h2>
-              <p>
-                Every message reaches a real person. We usually reply within a
-                couple of days.
+            <aside>
+              <span className="eyebrow">Get in touch</span>
+              <h2>Ready to start your journey?</h2>
+              <p style={{ marginTop: "0.85rem" }}>
+                Reach out for personalized consultations and guidance. Sessions are available both
+                in person and online.
               </p>
-              <ul className="contact-info">
-                <li>
-                  <span className="ci-icon" aria-hidden="true">
-                    ✉️
+
+              <ul className="info-list">
+                <li className="info-item">
+                  <span className="info-icon" aria-hidden="true">
+                    ✆
+                  </span>
+                  <div>
+                    <strong>Phone</strong>
+                    <a href={`tel:${site.phoneHref}`}>{site.phone}</a>
+                  </div>
+                </li>
+                <li className="info-item">
+                  <span className="info-icon" aria-hidden="true">
+                    ✉
                   </span>
                   <div>
                     <strong>Email</strong>
-                    <span>hello@lifesecretplus.com</span>
+                    <a href={`mailto:${site.email}`}>{site.email}</a>
                   </div>
                 </li>
-                <li>
-                  <span className="ci-icon" aria-hidden="true">
-                    ⏱️
+                <li className="info-item">
+                  <span className="info-icon" aria-hidden="true">
+                    ◷
                   </span>
                   <div>
                     <strong>Response time</strong>
-                    <span>Within 2 business days</span>
+                    <span>Usually within one to two working days</span>
                   </div>
                 </li>
-                <li>
-                  <span className="ci-icon" aria-hidden="true">
-                    💡
+                <li className="info-item">
+                  <span className="info-icon" aria-hidden="true">
+                    ✦
                   </span>
                   <div>
-                    <strong>Topic requests</strong>
-                    <span>Tell us what you want to read next</span>
+                    <strong>Follow along</strong>
+                    <div className="socials" style={{ marginTop: "0.5rem", color: "var(--brand)" }}>
+                      {socials.map((s) => (
+                        <a
+                          key={s.label}
+                          href={s.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={s.label}
+                          style={{ background: "var(--brand-soft)" }}
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d={s.path} />
+                          </svg>
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </li>
               </ul>
-            </div>
+            </aside>
 
             <ContactForm />
           </div>
