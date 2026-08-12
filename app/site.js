@@ -2,7 +2,7 @@ export const site = {
   name: "Life Secret Plus",
   legalName: "Life Secret Plus",
   tagline: "Empowering Lives with Insight & Guidance",
-  url: "https://lifesecretplus.com",
+  url: "https://www.lifesecretplus.com",
   author: "Shaheen Haq",
   email: "shaheen_haq@hotmail.co.uk",
   phone: "+44 7525 179336",

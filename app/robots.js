@@ -1,6 +1,9 @@
+import { site } from "./site";
+
 export default function robots() {
   return {
     rules: { userAgent: "*", allow: "/", disallow: "/admin" },
-    sitemap: "https://lifesecretplus.com/sitemap.xml",
+    sitemap: `${site.url}/sitemap.xml`,
+    host: site.url,
   };
 }
