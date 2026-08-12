@@ -10,7 +10,13 @@ import {
   verifyPassword,
   verifySessionToken,
 } from "../../lib/auth";
-import { deleteContactMessage, setContactMessageStatus } from "../../lib/db";
+import {
+  createDbPost,
+  deleteContactMessage,
+  deleteDbPost,
+  setContactMessageStatus,
+  updateDbPost,
+} from "../../lib/db";
 
 const attempts = new Map();
 const ATTEMPT_WINDOW_MS = 5 * 60_000;
@@ -69,4 +75,72 @@ export async function removeMessage(formData) {
   await requireSession();
   await deleteContactMessage(formData.get("id"));
   revalidatePath("/admin");
+}
+
+/* ---------- Blog posts ---------- */
+
+function slugify(value) {
+  return String(value)
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 90);
+}
+
+function revalidateBlog(slug) {
+  revalidatePath("/");
+  revalidatePath("/blog");
+  revalidatePath("/sitemap.xml");
+  if (slug) revalidatePath(`/blog/${slug}`);
+}
+
+export async function savePost(_prevState, formData) {
+  await requireSession();
+
+  const id = formData.get("id");
+  const title = String(formData.get("title") || "").trim();
+  const content = String(formData.get("content") || "").trim();
+  const slug = slugify(formData.get("slug") || title);
+  const publishedAt = String(formData.get("publishedAt") || "").trim();
+
+  if (title.length < 3) return { error: "Give the post a title of at least 3 characters." };
+  if (content.length < 20) return { error: "The post content is too short." };
+  if (!slug) return { error: "Could not build a URL slug — please set one manually." };
+
+  const post = {
+    slug,
+    title,
+    excerpt: String(formData.get("excerpt") || "").trim() || null,
+    image: String(formData.get("image") || "").trim() || null,
+    author: String(formData.get("author") || "").trim() || null,
+    tag: String(formData.get("tag") || "").trim() || null,
+    content,
+    status: formData.get("status") === "draft" ? "draft" : "published",
+    publishedAt: publishedAt || null,
+  };
+
+  try {
+    if (id) {
+      await updateDbPost(id, post);
+    } else {
+      await createDbPost(post);
+    }
+  } catch (err) {
+    if (err?.code === "23505") return { error: "That URL slug is already used by another post." };
+    return { error: "Could not save the post. Please try again." };
+  }
+
+  revalidateBlog(slug);
+  revalidatePath("/admin/posts");
+  redirect("/admin/posts?saved=1");
+}
+
+export async function removePost(formData) {
+  await requireSession();
+  const deleted = await deleteDbPost(formData.get("id"));
+  revalidateBlog(deleted?.slug);
+  revalidatePath("/admin/posts");
 }

@@ -7,16 +7,15 @@ export const metadata = {
 
 export default function AdminLogin() {
   return (
-    <section className="section">
-      <div className="wrap">
-        <div className="admin-login">
-          <span className="eyebrow center">Life Secret Plus</span>
-          <h1 style={{ fontSize: "1.9rem", textAlign: "center", marginBottom: "1.75rem" }}>
-            Admin sign in
-          </h1>
-          <LoginForm />
-        </div>
+    <div className="admin-login-page">
+      <div className="admin-login">
+        <span className="brand-mark" aria-hidden="true">
+          ✦
+        </span>
+        <h1>Admin sign in</h1>
+        <p className="sub">Life Secret Plus dashboard</p>
+        <LoginForm />
       </div>
-    </section>
+    </div>
   );
 }

@@ -20,6 +20,8 @@ export default function SiteHeader() {
     };
   }, [open]);
 
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <>
       <div className="topbar">

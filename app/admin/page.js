@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { countContactMessages, getContactMessages, isDatabaseConfigured } from "../../lib/db";
-import { logout, markMessage, removeMessage } from "./actions";
+import { markMessage, removeMessage } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,12 @@ export const metadata = {
   title: "Messages",
   robots: { index: false, follow: false },
 };
+
+const filters = [
+  { value: "all", label: "All" },
+  { value: "new", label: "Unread" },
+  { value: "read", label: "Read" },
+];
 
 function fmt(date) {
   return new Date(date).toLocaleString("en-GB", {
@@ -18,89 +25,138 @@ function fmt(date) {
   });
 }
 
-export default async function AdminMessages() {
+export default async function AdminMessages({ searchParams }) {
+  const params = await searchParams;
+  const status = filters.some((f) => f.value === params?.status) ? params.status : "all";
+  const q = (params?.q || "").trim();
+
   const [messages, counts] = await Promise.all([
-    getContactMessages({ limit: 100 }),
+    getContactMessages({ limit: 200, status, q }),
     countContactMessages(),
   ]);
 
   return (
-    <section className="section">
-      <div className="wrap">
-        <div className="admin-head">
-          <div>
-            <span className="eyebrow">Admin</span>
-            <h1 style={{ fontSize: "2rem" }}>Contact messages</h1>
-          </div>
-          <form action={logout}>
-            <button className="btn btn-outline btn-sm" type="submit">
-              Sign out
-            </button>
-          </form>
+    <>
+      <div className="admin-head">
+        <div>
+          <span className="eyebrow">Inbox</span>
+          <h1>Contact messages</h1>
         </div>
+      </div>
 
-        {!isDatabaseConfigured ? (
-          <p className="form-status err">
-            No database is connected. Set DATABASE_URL so submissions can be stored.
-          </p>
-        ) : (
-          <>
-            <div className="stats admin-stats">
-              <div className="stat">
-                <strong>{counts.total}</strong>
-                <span>Total messages</span>
-              </div>
-              <div className="stat">
-                <strong>{counts.unread}</strong>
-                <span>Unread</span>
-              </div>
+      {!isDatabaseConfigured ? (
+        <p className="form-status err">
+          No database is connected. Set DATABASE_URL so submissions can be stored.
+        </p>
+      ) : (
+        <>
+          <div className="admin-cards">
+            <div className="admin-card">
+              <strong>{counts.total}</strong>
+              <span>Total messages</span>
+            </div>
+            <div className="admin-card">
+              <strong>{counts.unread}</strong>
+              <span>Unread</span>
+            </div>
+            <div className="admin-card">
+              <strong>{counts.total - counts.unread}</strong>
+              <span>Read</span>
+            </div>
+          </div>
+
+          <div className="admin-toolbar">
+            <div className="admin-tabs">
+              {filters.map((f) => (
+                <Link
+                  key={f.value}
+                  href={{ pathname: "/admin", query: { ...(q ? { q } : {}), status: f.value } }}
+                  className={status === f.value ? "active" : undefined}
+                >
+                  {f.label}
+                </Link>
+              ))}
             </div>
 
-            {messages.length === 0 ? (
-              <p className="admin-empty">No messages yet.</p>
-            ) : (
-              <ul className="admin-list">
-                {messages.map((m) => (
-                  <li key={m.id} className={`admin-item${m.status === "new" ? " unread" : ""}`}>
-                    <div className="admin-item-head">
-                      <div>
+            <form className="admin-search" action="/admin">
+              {status !== "all" && <input type="hidden" name="status" value={status} />}
+              <input
+                type="search"
+                name="q"
+                defaultValue={q}
+                placeholder="Search name, email or message…"
+                aria-label="Search messages"
+              />
+              <button className="btn btn-sm" type="submit">
+                Search
+              </button>
+            </form>
+          </div>
+
+          {messages.length === 0 ? (
+            <p className="admin-empty">No messages match this view.</p>
+          ) : (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>From</th>
+                    <th>Subject &amp; message</th>
+                    <th>Received</th>
+                    <th aria-label="Actions" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {messages.map((m) => (
+                    <tr key={m.id} className={m.status === "new" ? "unread" : undefined}>
+                      <td>
+                        <span className={`pill ${m.status === "new" ? "pill-new" : "pill-read"}`}>
+                          {m.status === "new" ? "Unread" : "Read"}
+                        </span>
+                      </td>
+                      <td>
                         <strong>{m.name}</strong>
                         <a href={`mailto:${m.email}`}>{m.email}</a>
-                      </div>
-                      <time dateTime={new Date(m.created_at).toISOString()}>
-                        {fmt(m.created_at)}
-                      </time>
-                    </div>
-
-                    {m.subject && <p className="admin-subject">{m.subject}</p>}
-                    <p className="admin-message">{m.message}</p>
-
-                    <div className="admin-actions">
-                      <form action={markMessage}>
-                        <input type="hidden" name="id" value={m.id} />
-                        <input
-                          type="hidden"
-                          name="status"
-                          value={m.status === "new" ? "read" : "new"}
-                        />
-                        <button className="btn btn-outline btn-sm" type="submit">
-                          Mark as {m.status === "new" ? "read" : "unread"}
-                        </button>
-                      </form>
-                      <form action={removeMessage}>
-                        <input type="hidden" name="id" value={m.id} />
-                        <button className="btn btn-outline btn-sm admin-delete" type="submit">
-                          Delete
-                        </button>
-                      </form>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </div>
-    </section>
+                      </td>
+                      <td className="admin-cell-message">
+                        {m.subject && <strong>{m.subject}</strong>}
+                        <p>{m.message}</p>
+                      </td>
+                      <td className="admin-cell-date">
+                        <time dateTime={new Date(m.created_at).toISOString()}>
+                          {fmt(m.created_at)}
+                        </time>
+                      </td>
+                      <td>
+                        <div className="admin-row-actions">
+                          <form action={markMessage}>
+                            <input type="hidden" name="id" value={m.id} />
+                            <input
+                              type="hidden"
+                              name="status"
+                              value={m.status === "new" ? "read" : "new"}
+                            />
+                            <button className="btn btn-outline btn-sm" type="submit">
+                              Mark {m.status === "new" ? "read" : "unread"}
+                            </button>
+                          </form>
+                          <form action={removeMessage}>
+                            <input type="hidden" name="id" value={m.id} />
+                            <button className="btn btn-outline btn-sm admin-delete" type="submit">
+                              Delete
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getAllPosts, getPost } from "../../../lib/posts";
+import { notFound } from "next/navigation";
+import { getFilePostSlugs, getPost } from "../../../lib/posts";
 import { site } from "../../site";
 
 const fmtDate = (d) =>
@@ -10,13 +11,16 @@ const fmtDate = (d) =>
     day: "numeric",
   });
 
+export const revalidate = 60;
+
 export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+  return getFilePostSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const post = await getPost(slug);
+  if (!post) return { title: "Post not found" };
   const url = `${site.url}/blog/${slug}`;
   return {
     title: post.title,
@@ -42,6 +46,7 @@ export async function generateMetadata({ params }) {
 export default async function Post({ params }) {
   const { slug } = await params;
   const post = await getPost(slug);
+  if (!post) notFound();
 
   const jsonLd = {
     "@context": "https://schema.org",

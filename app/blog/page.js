@@ -17,8 +17,10 @@ function fmtDate(d) {
   });
 }
 
-export default function Blog() {
-  const posts = getAllPosts();
+export const revalidate = 60;
+
+export default async function Blog() {
+  const posts = await getAllPosts();
 
   return (
     <>
@@ -59,7 +61,7 @@ export default function Blog() {
                   </Link>
                   <div className="post-body">
                     <div className="post-meta">
-                      <span className="tag">Mindset</span>
+                      <span className="tag">{post.tag || "Mindset"}</span>
                       <time dateTime={post.date}>{fmtDate(post.date)}</time>
                     </div>
                     <h3>

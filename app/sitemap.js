@@ -1,8 +1,8 @@
 import { getAllPosts } from "../lib/posts";
 
-export default function sitemap() {
+export default async function sitemap() {
   const base = "https://lifesecretplus.com";
-  const posts = getAllPosts().map((post) => ({
+  const posts = (await getAllPosts()).map((post) => ({
     url: `${base}/blog/${post.slug}`,
     lastModified: post.date,
     changeFrequency: "monthly",
