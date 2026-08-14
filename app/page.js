@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getAllPosts } from "../lib/posts";
-import { site } from "./site";
+import { site, socials } from "./site";
 
 export const metadata = {
   title: "Life Secret Plus — Palmistry Readings & Life Coaching",
@@ -84,8 +84,68 @@ export const revalidate = 60;
 export default async function Home() {
   const posts = (await getAllPosts()).slice(0, 3);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ProfessionalService",
+        "@id": `${site.url}/#organization`,
+        name: site.name,
+        legalName: site.legalName,
+        slogan: site.tagline,
+        url: site.url,
+        email: site.email,
+        telephone: site.phone,
+        logo: `${site.url}/images/shared/favicon-lifesecret-plus.png`,
+        image: `${site.url}/images/shared/favicon-lifesecret-plus.png`,
+        founder: { "@id": `${site.url}/#founder` },
+        areaServed: "Worldwide",
+        sameAs: socials.map((s) => s.href),
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Services",
+          itemListElement: services.map((s) => ({
+            "@type": "Offer",
+            itemOffered: { "@type": "Service", name: s.title, description: s.text },
+          })),
+        },
+      },
+      {
+        "@type": "Person",
+        "@id": `${site.url}/#founder`,
+        name: site.author,
+        jobTitle: "Palmist & Life Coach",
+        email: site.email,
+        telephone: site.phone,
+        url: `${site.url}/about`,
+        worksFor: { "@id": `${site.url}/#organization` },
+        knowsAbout: [
+          "Palmistry",
+          "Palm reading",
+          "Life coaching",
+          "Positive psychology",
+          "Mindfulness",
+        ],
+        sameAs: socials.map((s) => s.href),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${site.url}/#website`,
+        name: site.name,
+        url: site.url,
+        inLanguage: "en-GB",
+        publisher: { "@id": `${site.url}/#organization` },
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Hero */}
       <section className="hero">
         <div className="hero-inner">
