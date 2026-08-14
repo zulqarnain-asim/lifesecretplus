@@ -88,7 +88,8 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "ProfessionalService",
+        // Organization rather than LocalBusiness: there is no public street address to publish.
+        "@type": "Organization",
         "@id": `${site.url}/#organization`,
         name: site.name,
         legalName: site.legalName,
@@ -100,6 +101,14 @@ export default async function Home() {
         image: `${site.url}/images/shared/favicon-lifesecret-plus.png`,
         founder: { "@id": `${site.url}/#founder` },
         areaServed: "Worldwide",
+        address: { "@type": "PostalAddress", addressCountry: "GB" },
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "customer support",
+          telephone: site.phone,
+          email: site.email,
+          availableLanguage: ["English", "Urdu"],
+        },
         sameAs: socials.map((s) => s.href),
         hasOfferCatalog: {
           "@type": "OfferCatalog",
