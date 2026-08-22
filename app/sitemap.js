@@ -5,9 +5,10 @@ export default async function sitemap() {
   const base = site.url;
   const posts = (await getAllPosts()).map((post) => ({
     url: `${base}/blog/${post.slug}`,
-    lastModified: post.date,
+    lastModified: post.modified || post.date,
     changeFrequency: "monthly",
     priority: 0.8,
+    images: post.image ? [`${base}${post.image}`] : undefined,
   }));
   return [
     { url: base, changeFrequency: "weekly", priority: 1 },

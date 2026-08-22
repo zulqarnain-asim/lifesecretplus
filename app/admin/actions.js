@@ -168,6 +168,7 @@ export async function savePost(_prevState, formData) {
     title,
     excerpt: String(formData.get("excerpt") || "").trim() || null,
     image,
+    imageAlt: String(formData.get("imageAlt") || "").trim() || null,
     author: String(formData.get("author") || "").trim() || null,
     tag: String(formData.get("tag") || "").trim() || null,
     content,

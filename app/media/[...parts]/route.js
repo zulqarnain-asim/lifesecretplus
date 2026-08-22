@@ -1,7 +1,9 @@
 import { getImage } from "../../../lib/db";
 
+// /media/<id> and /media/<id>/<descriptive-name> both serve the same upload.
 export async function GET(_request, { params }) {
-  const { id } = await params;
+  const { parts } = await params;
+  const id = parts?.[0] || "";
   if (!/^\d+$/.test(id)) return new Response("Not found", { status: 404 });
 
   const image = await getImage(id);

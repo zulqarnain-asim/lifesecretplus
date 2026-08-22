@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getFilePostSlugs, getPost } from "../../../lib/posts";
+import { getAllPosts, getFilePostSlugs, getPost } from "../../../lib/posts";
 import { site } from "../../site";
 
 const fmtDate = (d) =>
@@ -32,8 +32,11 @@ export async function generateMetadata({ params }) {
       title: post.title,
       description: post.excerpt,
       publishedTime: post.date,
+      modifiedTime: post.modified || post.date,
       authors: post.author ? [post.author] : undefined,
-      images: post.image ? [{ url: post.image }] : undefined,
+      images: post.image
+        ? [{ url: post.image, alt: post.imageAlt || post.title }]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -48,15 +51,37 @@ export default async function Post({ params }) {
   const post = await getPost(slug);
   if (!post) notFound();
 
+  const alt = post.imageAlt || post.title;
+  const related = (await getAllPosts()).filter((p) => p.slug !== slug).slice(0, 3);
+
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    datePublished: post.date,
-    author: { "@type": "Person", name: post.author || site.author },
-    image: post.image ? [`${site.url}${post.image}`] : undefined,
-    mainEntityOfPage: `${site.url}/blog/${slug}`,
-    publisher: { "@type": "Organization", name: site.name },
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.excerpt,
+        datePublished: post.date,
+        dateModified: post.modified || post.date,
+        wordCount: post.contentHtml.replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length,
+        articleSection: post.tag,
+        inLanguage: "en-GB",
+        author: { "@type": "Person", name: post.author || site.author },
+        image: post.image
+          ? [{ "@type": "ImageObject", url: `${site.url}${post.image}`, caption: alt }]
+          : undefined,
+        mainEntityOfPage: `${site.url}/blog/${slug}`,
+        publisher: { "@id": `${site.url}/#organization` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: site.url },
+          { "@type": "ListItem", position: 2, name: "Blog", item: `${site.url}/blog` },
+          { "@type": "ListItem", position: 3, name: post.title },
+        ],
+      },
+    ],
   };
 
   return (
@@ -81,7 +106,7 @@ export default async function Post({ params }) {
             <div className="article-hero">
               <Image
                 src={post.image}
-                alt={post.title}
+                alt={alt}
                 width={1200}
                 height={675}
                 priority
@@ -110,6 +135,49 @@ export default async function Post({ params }) {
           </p>
         </div>
       </article>
+
+      {related.length > 0 && (
+        <section className="section section-soft">
+          <div className="wrap">
+            <div className="section-head">
+              <h2>Keep reading</h2>
+              <p>More encouragement from the Life Secret Plus blog.</p>
+            </div>
+            <div className="posts">
+              {related.map((p) => (
+                <article className="post-card" key={p.slug}>
+                  <Link href={`/blog/${p.slug}`}>
+                    <div className="post-media">
+                      {p.image && (
+                        <Image
+                          src={p.image}
+                          alt={p.imageAlt || p.title}
+                          width={640}
+                          height={400}
+                          sizes="(max-width: 960px) 92vw, 360px"
+                        />
+                      )}
+                    </div>
+                  </Link>
+                  <div className="post-body">
+                    <div className="post-meta">
+                      <span className="tag">{p.tag || "Mindset"}</span>
+                      <time dateTime={p.date}>{fmtDate(p.date)}</time>
+                    </div>
+                    <h3>
+                      <Link href={`/blog/${p.slug}`}>{p.title}</Link>
+                    </h3>
+                    <p>{p.excerpt}</p>
+                    <Link href={`/blog/${p.slug}`} className="read-more">
+                      Read more →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

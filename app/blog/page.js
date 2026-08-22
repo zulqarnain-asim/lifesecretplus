@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getAllPosts } from "../../lib/posts";
+import { site } from "../site";
 
 export const metadata = {
   title: "Blog",
@@ -22,8 +23,43 @@ export const revalidate = 60;
 export default async function Blog() {
   const posts = await getAllPosts();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Blog",
+        "@id": `${site.url}/blog#blog`,
+        name: "Life Secret Plus Blog",
+        url: `${site.url}/blog`,
+        inLanguage: "en-GB",
+        publisher: { "@id": `${site.url}/#organization` },
+        blogPost: posts.map((post) => ({
+          "@type": "BlogPosting",
+          headline: post.title,
+          description: post.excerpt,
+          datePublished: post.date,
+          url: `${site.url}/blog/${post.slug}`,
+          image: post.image ? `${site.url}${post.image}` : undefined,
+          author: { "@type": "Person", name: post.author || site.author },
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: site.url },
+          { "@type": "ListItem", position: 2, name: "Blog" },
+        ],
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <section className="page-hero">
         <div className="wrap">
           <span className="eyebrow">Our Blog</span>
@@ -51,7 +87,7 @@ export default async function Blog() {
                       {post.image && (
                         <Image
                           src={post.image}
-                          alt={post.title}
+                          alt={post.imageAlt || post.title}
                           width={640}
                           height={400}
                           sizes="(max-width: 960px) 92vw, 360px"

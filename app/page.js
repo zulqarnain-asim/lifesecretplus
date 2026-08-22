@@ -394,7 +394,7 @@ export default async function Home() {
                       {post.image && (
                         <Image
                           src={post.image}
-                          alt={post.title}
+                          alt={post.imageAlt || post.title}
                           width={640}
                           height={400}
                           sizes="(max-width: 960px) 92vw, 360px"

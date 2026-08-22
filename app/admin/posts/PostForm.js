@@ -140,6 +140,17 @@ export default function PostForm({ post }) {
           </div>
 
           <div className="field">
+            <label htmlFor="imageAlt">Image description</label>
+            <input
+              id="imageAlt"
+              name="imageAlt"
+              defaultValue={post?.image_alt || ""}
+              placeholder="Woman writing in a journal beside a sunlit window"
+            />
+            <small>Describe what the picture shows — this is what Google Images reads.</small>
+          </div>
+
+          <div className="field">
             <label htmlFor="image">…or an image path</label>
             <input
               id="image"
